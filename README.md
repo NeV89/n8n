@@ -22,3 +22,4 @@ System automatyzacji typu **Voice-to-CRM**, który przekształca wiadomości gł
 * **Airtable:** Relacyjna baza danych i centrum operacyjne.
 * **LLM:** Ollama (Qwen), Google Gemini, OpenAI.
 * **Telegram API:** Interfejs wejściowy dla użytkownika.
+<img width="1719" height="420" alt="{695C6850-2AEF-44B4-9909-BD065E38790F}" src="https://github.com/user-attachments/assets/94ddbd9c-0ae9-4b6b-8b19-ba4012f520a7" />
