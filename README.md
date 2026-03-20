@@ -1,25 +1,19 @@
-Oto poprawiony kod Markdown dla Twojego głównego pliku `README.md` w repozytorium **n8n**. Usunąłem wszystkie błędne odnośniki do Google i zastąpiłem je bezpośrednimi ścieżkami do plików na Twoim GitHubie.jpg, 0EFDC664-BA68-468C-AE7D-7F415EC29BF4.jpg].
-
-Skasuj całą obecną treść w edytorze i wklej ten "czysty" kod:
-
------
-
 # 🤖 Local AI Automation Infrastructure (n8n + Ollama)
 
-[](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Self-hosted automation stack integrated with a local LLM inference server, deployed for internal use in an engineering environment. This repository documents the configuration, deployment decisions, and operational notes for a fully local AI infrastructure — **zero external API calls for inference, no vendor lock-in.**
 
------
+---
 
 ## 🧩 Production Workflows (Blueprints)
 
 This repository hosts production-ready n8n workflows integrated with local LLMs.
 
-  * **[GitHub Repository Classifier](https://www.google.com/search?q=blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
-  * **Source:** [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
+* **[GitHub Repository Classifier](blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
+* **Source:** [github-repo-classifier.json](blueprints/github-repo-classifier.json)
 
------
+---
 
 ## 🛠️ Stack
 
@@ -37,19 +31,19 @@ This repository hosts production-ready n8n workflows integrated with local LLMs.
 
 All services run as Docker containers via [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged).
 
------
+---
 
 ## 🖥️ Hardware Configuration
 
 Optimized for high-density local inference and large-scale data processing.
 
-  * **GPU:** NVIDIA GeForce **RTX 5090 (32 GB VRAM)**
-  * **CPU:** AMD Ryzen 7 9700X (Zen 5, AVX-512)
-  * **RAM:** 64 GB DDR5 6000 MHz
-  * **SSD:** Samsung 990 EVO Plus 1TB (NVMe, PCIe 4.0)
-  * **OS:** Ubuntu 24.04 LTS
+* **GPU:** NVIDIA GeForce **RTX 5090 (32 GB VRAM)**
+* **CPU:** AMD Ryzen 7 9700X (Zen 5, AVX-512)
+* **RAM:** 64 GB DDR5 6000 MHz
+* **SSD:** Samsung 990 EVO Plus 1TB (NVMe, PCIe 4.0)
+* **OS:** Ubuntu 24.04 LTS
 
------
+---
 
 ## 🧠 Models (Ollama)
 
@@ -57,12 +51,12 @@ Models selected for dense architecture optimized for the 32 GB VRAM envelope:
 
 | Model | Quantization | Logic/Reasoning | Tools/Automation | Speed |
 | :--- | :--- | :---: | :---: | :---: |
-| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ |
-| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ |
-| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ |
-| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ |
+| **Qwen3-32B** | Q6_K_L | ★★★★★ | ★★★★★ | ★★★☆☆ |
+| **DeepSeek-R1-Distill-32B** | Q6_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ |
+| **Mistral-Small-3.2-24B** | Q8_0 | ★★★★☆ | ★★★★★ | ★★★★★ |
+| **Gemma-3-27B-IT** | Q8_0 | ★★★★☆ | ★★★★★ | ★★★★☆ |
 
------
+---
 
 ## 🔌 MCP Integration (Model Context Protocol)
 
@@ -76,28 +70,3 @@ Claude Code routes through local **Qwen3-Coder (30B)** running on the RTX 5090:
 $env:ANTHROPIC_AUTH_TOKEN="ollama"
 $env:ANTHROPIC_BASE_URL="http://[INTERNAL_IP]:11434"
 claude --model qwen3-coder:30b
-```
-
------
-
-## 🚀 Deployment & Operational Notes
-
-### Supabase Pooler — CRLF fix (Linux)
-
-```bash
-sed -i 's/\r$//' supabase/docker/volumes/pooler/pooler.exs
-```
-
------
-
-### Resources
-
-  * [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged)
-  * [czlonkowski/n8n-mcp](https://github.com/czlonkowski/n8n-mcp)
-  * [Nev89 Intelligence Hub](https://www.google.com/search?q=https://github.com/NeV89/Nev89/blob/main/docs/intelligence-hub.md)
-
------
-
-**Gotowe\!** Teraz po zapisaniu zmian i wejściu na główną stronę projektu `NeV89/n8n`, odnośniki będą kierować bezpośrednio do Twoich plików wewnątrz GitHuba.
-
-Czy chciałbyś, abym pomógł Ci teraz dodać tę samą licencję Apache do Twojego drugiego repozytorium (`NeV89/Nev89`)? To ostatni formalny krok przed wysłaniem wniosku o Claude Max.
