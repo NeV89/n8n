@@ -47,7 +47,7 @@ The system maps repositories into specialized domains including:
 
 ## 🚦 Getting Started
 
-1.  **Import:** Download the [workflow JSON](https://www.google.com/search?q=./blueprints/github-repo-classifier.json) and import it into your n8n instance.
+1.  **Import:** Download the [workflow JSON](./github-repo-classifier.json) and import it into your n8n instance.
 2.  **Configure:** Set up credentials for GitHub, Notion, and your LLM provider.
 3.  **Map:** Replace the placeholder Notion Block IDs in the `Resolve Notion Block` node with your own structure.
 4.  **Run:** Execute the search trigger to start the autonomous classification.
