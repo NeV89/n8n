@@ -1,0 +1,917 @@
+{
+  "name": "Github -przed ideałem copy",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.github.com/search/repositories?q=n8n&per_page=100&page=11",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "71c79566-3dee-417f-8276-a9c3314c849c",
+      "name": "Search GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -1360,
+        1264
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "P9e95gQ2inNlDcgm",
+          "name": "GitHub account PW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $json.items.map(i => ({json:i}));"
+      },
+      "id": "96895409-dafb-4b0a-b4a1-7440e448879b",
+      "name": "Extract Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1c06d31c-1e61-456b-80a4-2d42d67b0b70",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1040,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "repository",
+        "operation": "get",
+        "owner": "={{$json.owner.login}}",
+        "repository": "={{$json.name}}"
+      },
+      "id": "174c64aa-2925-43a0-a76e-2e852dd06512",
+      "name": "Get README",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        1280
+      ],
+      "webhookId": "912b05f3-a5e5-4692-8e58-7c64d0904c16",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "githubApi": {
+          "id": "P9e95gQ2inNlDcgm",
+          "name": "GitHub account PW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  return {\n    json: {\n      ...item.json,\n      readme: (item.json.readme || \"\").slice(0, 8000) // hard limit dla LLM\n    }\n  };\n});\n"
+      },
+      "id": "11eaf815-23d3-4753-85b7-12501b5bad64",
+      "name": "Normalize README",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "prompt": "={\n  \"system\": \"Jesteś silnikiem klasyfikacji repozytoriów GitHub do wielopoziomowego drzewa Notion. Zwracasz WYŁĄCZNIE poprawny JSON. Zabraniam tworzenia nowych kategorii. Zawsze używaj pełnej nazwy z listy allowedLeaves. Wszystkie wygenerowane teksty MUSZĄ być po polsku.\",\n  \"instructions\": [\n    \"1. PRZEANALIZUJ README i dopasuj repozytorium do JEDNEJ z dozwolonych kategorii.\",\n    \"2. SPRAWDŹ PRIORYTETY: Najpierw szukaj sygnałów w priorityBlocks.\",\n    \"3. ZABRONIONE: Tworzenie własnych nazw kategorii. Musisz wybrać istniejącą z allowedLeaves.\",\n    \"4. DOKŁADNOŚĆ: Zwrócone pole 'leaf' musi w 100% zgadzać się z allowedLeaves.\",\n    \"5. ZWRÓĆ TYLKO JEDEN OBIEKT JSON, żadnego tekstu przed ani po znaku klamry.\"\n  ],\n  \"categoryHints\": {\n    \"🎓 Kursy i szkolenia\": \"Tylko dla rzeczywistych kursów, materiałów szkoleniowych, ćwiczeń.\",\n    \"📺 Kolekcje powiązane z YouTube\": \"Dla wszelkich kolekcji workflowów i integracji, które pochodzą z kanałów na YouTube.\",\n    \"📦 Gotowe stosy AI (All-in-one)\": \"Dla repozytoriów zawierających Docker Compose uruchamiające wspólnie n8n, Ollama, Supabase itp.\",\n    \"📱 Komunikatory i Chatboty\": \"Dla węzłów integrujących WhatsApp, WeChat, Zalo, Telegram, Slack, ChatWoot.\",\n    \"🤖 Automatyzacja przeglądarki\": \"Dla węzłów opartych na Puppeteer, Selenium, Playwright.\",\n    \"📈 Autoskalowanie i kolejkowanie\": \"Narzędzia do autoskalowania i workerów n8n (np. z Puppeteerem).\",\n    \"💡 Home Assistant\": \"Wtyczki i dodatki łączące n8n z Home Assistant oraz automatyką domową.\",\n    \"👥 Rekrutacja i HR\": \"Narzędzia dla rynku pracy (np. hh.ru). NIE MYLIĆ z CRM!\",\n    \"🎯 Zarządzanie relacjami (CRM)\": \"Wyłącznie sprzedaż i relacje z KLIENTAMI. Nie wrzucaj tu narzędzi rekrutacyjnych.\"\n  },\n  \"priorityBlocks\": [\n    {\n      \"priority\": 1,\n      \"name\": \"EDUKACJA — ABSOLUTNY PRIORYTET 1\",\n      \"triggerKeywords\": [\"course\", \"tutorial\", \"learning\", \"udemy\", \"lessons\", \"szkolenie\", \"kurs\", \"bootcamp\"],\n      \"forceLeaf\": \"🎓 Kursy i szkolenia\"\n    },\n    {\n      \"priority\": 1.5,\n      \"name\": \"YOUTUBE WORKFLOWS — PRIORYTET YOUTUBE\",\n      \"triggerKeywords\": [\"youtube\", \"yt channel\", \"video tutorial\"],\n      \"forceLeaf\": \"📺 Kolekcje powiązane z YouTube\",\n      \"note\": \"Jeśli repozytorium to kolekcja workflowów z YouTube, ZAWSZE wybieraj tę kategorię.\"\n    },\n    {\n      \"priority\": 2,\n      \"name\": \"MCP — ABSOLUTNY PRIORYTET 2\",\n      \"triggerKeywords\": [\"MCP\", \"Model Context Protocol\", \"MCP server\", \"MCP client\", \"n8n-mcp\"],\n      \"subtypeRules\": [\n        { \"if\": \"implementuje serwer MCP\", \"leaf\": \"🌉 Serwery i mosty sterujące\" },\n        { \"if\": \"implementuje klienta MCP lub node\", \"leaf\": \"🤖 Węzły klienckie\" },\n        { \"if\": \"skillset / agent capabilities\", \"leaf\": \"🛠️ Skille i umiejętności agentów\" }\n      ]\n    },\n    {\n      \"priority\": 3,\n      \"name\": \"RAG — PRIORYTET 3\",\n      \"triggerKeywords\": [\"rag\", \"vector\", \"embeddings\", \"qdrant\", \"pinecone\", \"supabase\"],\n      \"note\": \"Wybierz najbardziej pasujący liść z sekcji Systemy RAG (np. Infrastruktura AI lub konkretna baza danych).\"\n    },\n    {\n      \"priority\": 4,\n      \"name\": \"NODE PACKAGES I SPECJALNE — PRIORYTET 4\",\n      \"triggerKeywords\": [\"n8n-nodes-\", \"custom node\", \"deepseek\", \"comfyui\", \"zalo-node\", \"wechat\", \"chatwoot\", \"puppeteer\", \"playwright\", \"redis\", \"autoscaling\", \"home assistant\", \"smart home\"],\n      \"subtypeRules\": [\n        { \"if\": \"deepseek\", \"leaf\": \"🤖 Modele i reasoning\" },\n        { \"if\": \"comfyui OR image generation\", \"leaf\": \"🖼️ Obraz: generowanie\" },\n        { \"if\": \"puppeteer OR playwright OR browserless\", \"leaf\": \"🤖 Automatyzacja przeglądarki\" },\n        { \"if\": \"zalo OR wechat OR chatwoot OR line\", \"leaf\": \"📱 Komunikatory i Chatboty\" },\n        { \"if\": \"autoscaling OR scale OR worker\", \"leaf\": \"📈 Autoskalowanie i kolejkowanie\" },\n        { \"if\": \"home assistant OR hass OR smart home\", \"leaf\": \"💡 Home Assistant\" }\n      ]\n    },\n    {\n      \"priority\": 4.5,\n      \"name\": \"BUILDERY WORKFLOW I UI\",\n      \"triggerKeywords\": [\"workflow builder\", \"n8n-Workflow-Builder-Ai\", \"folder-view\"],\n      \"subtypeRules\": [\n        { \"if\": \"n8n-Workflow-Builder-Ai OR browser assistant\", \"leaf\": \"🌐 Asystenci webowi\" },\n        { \"if\": \"folder-view OR ui\", \"leaf\": \"🧭 Rozszerzenia interfejsu\" }\n      ]\n    },\n    {\n      \"priority\": 6,\n      \"name\": \"KOLEKCJE SZABLONÓW\",\n      \"triggerKeywords\": [\"template\", \"workflow collection\", \"ready-made\", \"test-workflows\"],\n      \"forceLeaf\": \"📦 Repozytoria workflowów na GitHubie\"\n    },\n    {\n      \"priority\": 10,\n      \"name\": \"SKRYPTY INSTALACYJNE\",\n      \"triggerKeywords\": [\"ansible\", \"terraform\", \"docker-compose\", \"helm chart\", \"kubernetes\", \"k8s\"],\n      \"subtypeRules\": [\n        { \"if\": \"ansible OR terraform\", \"leaf\": \"🛠️ Skrypty instalacyjne i setup\" },\n        { \"if\": \"docker OR docker-compose\", \"leaf\": \"🐳 Kontenery\" },\n        { \"if\": \"kubernetes OR k8s OR helm\", \"leaf\": \"🏗️ Orkiestracja\" }\n      ]\n    },\n    {\n      \"priority\": 12,\n      \"name\": \"ROZWIĄZANIA CHMUROWE I PAAS\",\n      \"triggerKeywords\": [\"render\", \"heroku\", \"railway\", \"aws\", \"azure\", \"google cloud\", \"gcp\", \"digitalocean\", \"hostinger\", \"dokku\"],\n      \"subtypeRules\": [\n        { \"if\": \"heroku\", \"leaf\": \"🌠 Heroku\" },\n        { \"if\": \"digitalocean\", \"leaf\": \"🌊 DigitalOcean\" },\n        { \"if\": \"google cloud OR gcp OR gcr\", \"leaf\": \"🌈 Google Cloud Console\" },\n        { \"if\": \"render\", \"leaf\": \"💜 Render\" },\n        { \"if\": \"railway\", \"leaf\": \"🚂 Railway\" },\n        { \"if\": \"aws OR amazon\", \"leaf\": \"🟧 Amazon Web Services\" },\n        { \"if\": \"azure\", \"leaf\": \"💠 Microsoft Azure\" },\n        { \"if\": \"oracle\", \"leaf\": \"🏮 Oracle Cloud\" },\n        { \"if\": \"replit\", \"leaf\": \"☁️ Replit\" },\n        { \"if\": \"coolify\", \"leaf\": \"🏡 Coolify\" },\n        { \"if\": \"modal\", \"leaf\": \"☁️ Modal\" },\n        { \"if\": \"mikrus\", \"leaf\": \"🌍 Mikrus\" },\n        { \"if\": \"hostinger\", \"leaf\": \"🖥️ Hostinger\" },\n        { \"if\": \"koyeb\", \"leaf\": \"🛰️ Koyeb\" },\n        { \"if\": \"clever cloud\", \"leaf\": \"☁️ Clever Cloud\" },\n        { \"if\": \"cloud native\", \"leaf\": \"🌤️ Cloud Native\" },\n        { \"if\": \"dokku OR inne\", \"leaf\": \"☁️ Inne chmury\" }\n      ]\n    }\n  ],\n  \"summaryRules\": [\n    \"Zawsze po polsku\",\n    \"Maksymalnie 190 znaków\",\n    \"ZABRONIONE JEST używanie cudzysłowów (\\\") wewnątrz tekstów. Używaj apostrofów (').\"\n  ],\n  \"hardBlocks\": [\n    \"NIGDY nie wymyślaj własnych kategorii.\",\n    \"W polu 'leaf' MUSISZ skopiować wartość 1:1 z listy allowedLeaves.\",\n    \"ZABRONIONE JEST używanie znaków nowej linii (\\\\n) wewnątrz wartości JSON.\",\n    \"ZABRONIONE JEST używanie cudzysłowów (\\\") wewnątrz wygenerowanego tekstu.\"\n  ],\n  \"allowedLeaves\": [\n    \"🏠 Rdzeń i aplikacje\", \"📖 Dokumentacja\", \"📂 Katalogi\", \"🎛️ Zarządzanie workflow\", \"🗺️ Wizualizacja i dokumentacja workflow\", \"🛠️ Skrypty instalacyjne i setup\", \"📊 Benchmarking i rankingi modeli AI\", \"🎓 Kursy i szkolenia\", \"🌏 Przewodniki i lokalizacja\", \"📜 Baza wiedzy\", \"👨‍👩‍👧‍👦 Społeczność\", \"🏛️ Oficjalna biblioteka\", \"📺 Kolekcje powiązane z YouTube\", \"📦 Repozytoria workflowów na GitHubie\", \"🌐 Kolekcje automatyzacji\", \"📊 Wyselekcjonowane bazy danych\", \"🌍 Zasoby regionalne\", \"🧩 Rozszerzenia przeglądarki Chrome\", \"🌐 Asystenci webowi\", \"🐳 Kontenery\", \"📜 Skrypty i konfiguracja\", \"🔌 Konfiguracja\", \"📦 Środowisko uruchomieniowe\", \"⚙️ Rdzeń\", \"🌐 Proxy, bramki sieciowe i tunelowanie instancji lokalnej\", \"🛸 Alternatywy i Middleware AI\", \"🚀 Szybkie wdrożenia\", \"🌤️ Cloud Native\", \"🌈 Google Cloud Console\", \"🏮 Oracle Cloud\", \"💠 Microsoft Azure\", \"💜 Render\", \"☁️ Replit\", \"🏡 Coolify\", \"☁️ Modal\", \"🌍 Mikrus\", \"🖥️ Hostinger\", \"🛰️ Koyeb\", \"🚂 Railway\", \"☁️ Clever Cloud\", \"🟧 Amazon Web Services\", \"🌠 Heroku\", \"🌊 DigitalOcean\", \"☁️ Inne chmury\", \"🌐 Tunelowanie instancji lokalnej\", \"🏗️ Orkiestracja\", \"📈 Autoskalowanie i kolejkowanie\", \"🧱 Big data i platformy danych\", \"🤖 Modele i reasoning\", \"🧪 Implementacje i modele\", \"🤵 Systemy agentowe\", \"🎙️ Transkrypcja\", \"🗣️ Generowanie mowy\", \"👤 Klonowanie głosu\", \"🖼️ Obraz: generowanie\", \"👁️ Analiza obrazu\", \"📄 OCR i analiza dokumentów\", \"🔍 AI Search i Web Research\", \"🕷️ Infrastruktura headless\", \"🤖 Automatyzacja przeglądarki\", \"🔍 Ekstrakcja danych (web data)\", \"📉 Research i OSINT\", \"📱 Komunikatory i Chatboty\", \"👥 Profile i social media\", \"📢 Publikacja wielokanałowa\", \"🎙️ Podcasty i newslettery audio\", \"📧 Poczta e-mail\", \"🚨 Alerting i powiadomienia\", \"🎯 Zarządzanie relacjami (CRM)\", \"🚀 Automatyzacja sprzedaży\", \"📩 Systemy follow-up\", \"🛎️ Obsługa zgłoszeń i onboarding\", \"⭐ Automatyzacja zbierania opinii\", \"👥 Rekrutacja i HR\", \"🏢 Systemy ERP i Business Suite\", \"📚 Dokumentacja IT\", \"💾 Bazy danych i storage\", \"📄 Dokumenty i PDF\", \"💸 Monetyzacja i Billing AI\", \"📊 Analityka i Business Intelligence\", \"📡 Protokoły przemysłowe i IoT\", \"💻 Runtime i custom code (python)\", \"🏗️ Tworzenie węzłów\", \"⚙️ Środowisko skryptowe i manipulacja danymi\", \"🧑‍💻 Jakość kodu\", \"🔧 Narzędzia DevOps i Tooling deweloperski\", \"🛠️ Zaawansowane narzędzia HTTP\", \"💻 SDK i Biblioteki Programistyczne\", \"🔗 Integracje frameworków webowych\", \"💡 Home Assistant\", \"📦 E-commerce i płatności\", \"🎮 Rozrywka i gaming\", \"💰 Finanse i kryptowaluty\", \"🔔 Produktywność osobista\", \"🎨 Media i multimedia\", \"🎬 Generowanie wideo AI\", \"📮 Agregatory i RSS\", \"📅 Kalendarze i planowanie\", \"✅ Zarządzanie projektami\", \"🔍 SEO i marketing\", \"📂 Indeksy i listy węzłów społeczności\", \"🌉 Serwery i mosty sterujące\", \"🤖 Węzły klienckie\", \"🌐 Warstwa łączności i bramek sieciowych\", \"🛠️ Skille i umiejętności agentów\", \"🤖 ChatGPT (Web)\", \"🧑‍💻 Claude Code\", \"🧠 Claude\", \"🌐 Claude.ai (Web)\", \"💻 Cursor\", \"💎 Gemini\", \"🤖 GitHub Copilot\", \"⚙️ Instalacja n8n-skills\", \"💜 Lovable\", \"💠 LM Studio\", \"🔌 n8n-mcp.com\", \"🤖 OpenAI Agent Builder\", \"🚀 Windsurf\", \"📦 Gotowe stosy AI (All-in-one)\", \"🛠️ Infrastruktura AI\", \"🗃️ Lokalne bazy wektorowe\", \"📓 Inteligentne notatniki (Knowledge Notebooks)\", \"🌲 Pinecone\", \"🧭 Qdrant Cloud\", \"🐬 Supabase Cloud\", \"🔷 Gemini File Search\", \"🧵 Needle\", \"🤖 OpenAI Assistants API\", \"🧠 Strategie Retrieval (Multi-query, Reranking, Hybryda)\", \"🕸️ GraphRAG i Grafy Wiedzy (Neo4j, LightRAG, kingler/n8n_agent)\", \"🧪 Ewaluacja i Jakość (Monitoring RAG)\", \"🧭 Rozszerzenia interfejsu\", \"📊 Dashboardy i wizualizacja\", \"🖌️ Personalizacja UI\", \"🏥 Diagnostyka i monitoring zdrowia instancji\", \"📊 Zarządzanie przez n8n-panel\", \"🚨 Alertowanie o awariach\", \"💾 Zarządzanie wersjami i backup\", \"🐞 Debugowanie i techniki diagnostyczne\", \"📈 Monitoring modeli i LLMOps\", \"🔑 Zarządzanie konfiguracją i zmiennymi globalnymi\", \"🔓 Zarządzanie poświadczeniami (credentials)\", \"🚨 Audyt, podatności\", \"👮 Automatyzacja SecOps\", \"⚠️ Exploity i CVE\", \"🧯 Automatyzacja bezpieczeństwa (SOAR)\", \"🛡️ Cyberbezpieczeństwo i OffSec\", \"🚀 Gotowe rozwiązania biznesowe i Saas\", \"🛡️ Inne\"\n  ],\n  \"outputFormat\": {\n    \"leaf\": \"[Skopiuj dokładnie JEDNĄ nazwę z allowedLeaves]\",\n    \"icon\": \"[Skopiuj pierwsze emoji z wybranej nazwy leaf]\",\n    \"summary\": \"[Krótki opis funkcjonalny repozytorium - po polsku, max 190 znaków, bez cudzysłowów]\",\n    \"sections\": [\n      { \"title\": \"Zakres funkcjonalny\", \"content\": \"szczegóły po polsku bez cudzysłowów...\" },\n      { \"title\": \"Zastosowanie w automatyzacji\", \"content\": \"szczegóły po polsku bez cudzysłowów...\" },\n      { \"title\": \"Uwagi integracyjne\", \"content\": \"szczegóły po polsku bez cudzysłowów...\" }\n    ],\n    \"github\": { \"name\": \"\", \"url\": \"\" }\n  },\n  \"repository\": {\n    \"name\": \"{{ $json.name }}\",\n    \"description\": \"{{ ($json.description || '').substring(0, 500) }}\",\n    \"readme\": \"{{ ($json.readme || '').substring(0, 800) }}\",\n    \"url\": \"{{ $json.html_url }}\"\n  }\n}"
+      },
+      "id": "d47bc3ce-d5bc-4340-a427-46a92a8137fe",
+      "name": "LLM Classifier",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.0-flash-001",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "4d10df4f-0180-4ef7-8fd3-3163c5d71661",
+      "name": "OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        2336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.text || \"\";\n\nfunction fb(reason) {\n  return [{\n    json: {\n      leaf: \"🛡️ Inne\",\n      summary: reason,\n      icon: \"⚠️\",\n      sections: [\n        { title: \"Zakres funkcjonalny\", content: \"Brak - błąd modelu\" },\n        { title: \"Zastosowanie w automatyzacji\", content: \"Brak - błąd modelu\" },\n        { title: \"Uwagi integracyjne\", content: reason }\n      ],\n      github: { name: \"Błąd\", url: \"\" }\n    }\n  }];\n}\n\n// Wyciągnij JSON między klamrami\nconst jsonMatch = raw.match(/\\{[\\s\\S]*\\}/);\nif (!jsonMatch) return fb(\"Pusta odpowiedź LLM\");\n\nlet cleaned = jsonMatch[0];\n\n// === KLUCZOWE NAPRAWY ===\n\n// 1. Usuń literalne \\n wewnątrz wartości stringów (model wstawia je mimo zakazu)\n// Zamień \\n na spację tylko wewnątrz cudzysłowów\ncleaned = cleaned.replace(/\"((?:[^\"\\\\]|\\\\.)*)\"/g, (match, inner) => {\n  const fixed = inner\n    .replace(/\\\\n/g, ' ')      // escaped \\n -> spacja\n    .replace(/\\n/g, ' ')       // prawdziwy newline -> spacja\n    .replace(/\\r/g, '')        // carriage return\n    .replace(/\\t/g, ' ')       // tab -> spacja\n    .replace(/\\s+/g, ' ')      // wielokrotne spacje -> jedna\n    .replace(/\"/g, \"'\")        // cudzysłowy wewnątrz -> apostrofy (dodatkowe zabezpieczenie)\n    .trim();\n  return `\"${fixed}\"`;\n});\n\n// 2. Usuń trailing commas przed } lub ]\ncleaned = cleaned.replace(/,\\s*([}\\]])/g, '$1');\n\ntry {\n  if (!cleaned) return fb(\"Pusta odpowiedź LLM\");\n  const o = JSON.parse(cleaned);\n\n  if (!o.leaf) return fb(\"Brak leaf\");\n  if (!o.summary) return fb(\"Brak summary\");\n  if (!Array.isArray(o.sections)) return fb(\"Sections nie jest tablicą\");\n\n  return [{ json: o }];\n} catch (e) {\n  return fb(`Parse error: ${e.message}`);\n}"
+      },
+      "id": "a0387e57-9710-463c-8fd3-6ab1246c44ec",
+      "name": "Validate JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const REGISTRY = {\n  \"🏠 Rdzeń i aplikacje\": \"309c2324c413800c88a4f0588db1ac76\",\n  \"📖 Dokumentacja\": \"309c2324c4138013936efb4f15c03696\",\n  \"📂 Katalogi\": \"309c2324c413808fad23dd1f9a9ac32d\",\n  \"🎛️ Zarządzanie workflow\": \"309c2324c413807b820adf0e735c61ff\",\n  \"🗺️ Wizualizacja i dokumentacja workflow\": \"310c2324c413801ab61ce700dc0951a9\",\n  \"🛠️ Skrypty instalacyjne i setup\": \"30bc2324c41380e7a06ceaf16c45ffcb\",\n  \"📊 Benchmarking i rankingi modeli AI\": \"309c2324c41380da9f6ee39abf5b3225\",\n  \"🎓 Kursy i szkolenia\": \"309c2324c4138038a998e350ce1f3e7e\",\n  \"🌏 Przewodniki i lokalizacja\": \"309c2324c41380a5890cddce3467890e\",\n  \"📜 Baza wiedzy\": \"309c2324c413809db8e9f9303c4061b3\",\n  \"👨‍👩‍👧‍👦 Społeczność\": \"309c2324c4138068aee7c1277150543d\",\n  \"🏛️ Oficjalna biblioteka\": \"2ffc2324c41380eb84bcea3be7d8fedf\",\n  \"📺 Kolekcje powiązane z YouTube\": \"307c2324c41380e3bb98ed4a16a260bf\",\n  \"📦 Repozytoria workflowów na GitHubie\": \"309c2324c4138097b480ff283bb12291\",\n  \"🌐 Kolekcje automatyzacji\": \"2ffc2324c413802ab4eeff82ace65837\",\n  \"📊 Wyselekcjonowane bazy danych\": \"2ffc2324c413804ba7dbc2da2db43e49\",\n  \"🌍 Zasoby regionalne\": \"2ffc2324c4138094bf11fcdba8407116\",\n  \"🧩 Rozszerzenia przeglądarki Chrome\": \"308c2324c41380c6969cf5b9468af404\",\n  \"🌐 Asystenci webowi\": \"308c2324c4138009b649c59075caddaf\",\n  \"🐳 Kontenery\": \"2ffc2324c413803cb0cddc12a6ff682f\",\n  \"📜 Skrypty i konfiguracja\": \"2ffc2324c41380bc8f53ce8e0e77ccb6\",\n  \"🔌 Konfiguracja\": \"2ffc2324c41380a89d4beaf2ed6267b3\",\n  \"📦 Środowisko uruchomieniowe\": \"2ffc2324c413800a9a11d53326497b80\",\n  \"⚙️ Rdzeń\": \"2ffc2324c41380f4bc2fd82dee9b51a1\",\n  \"🌐 Proxy, bramki sieciowe i tunelowanie instancji lokalnej\": \"309c2324c41380b9a5bef09ae87c39e8\",\n  \"🛸 Alternatywy i Middleware AI\": \"30ac2324c413809eaf58daea5f066c14\",\n  \"🚀 Szybkie wdrożenia\": \"2ffc2324c41380598a07ec8089acf3d5\",\n  \"🌤️ Cloud Native\": \"2ffc2324c413802fb199ff6b53a7b631\",\n  \"🌈 Google Cloud Console\": \"2ffc2324c413805d8bb7e49ce5cd7186\",\n  \"🏮 Oracle Cloud\": \"308c2324c41380439173ecd345517ca2\",\n  \"💠 Microsoft Azure\": \"308c2324c41380ce87a6d2fa7bf0021c\",\n  \"💜 Render\": \"30ac2324c4138077b2ded86fc7d1240d\",\n  \"☁️ Replit\": \"30ac2324c4138012abc9f61c7fdef489\",\n  \"🏡 Coolify\": \"30ac2324c41380ce8662e87116ccdfc5\",\n  \"☁️ Modal\": \"30ac2324c41380ddb7f6ccd09874b7d9\",\n  \"🌍 Mikrus\": \"30ac2324c41380a196cbeb92de1ed4bd\",\n  \"🖥️ Hostinger\": \"30ac2324c41380deab1ef603837d1d63\",\n  \"🛰️ Koyeb\": \"30ac2324c41380749ac7dbde951dab39\",\n  \"🚂 Railway\": \"30ac2324c41380608e1be1e7f6be417d\",\n  \"☁️ Clever Cloud\": \"30cc2324c41380ad9e61f7568a68f28f\",\n  \"🟧 Amazon Web Services\": \"30cc2324c41380d79ca2d3176f0a642d\",\n  \"🌠 Heroku\": \"316c2324c413801abaa4c3105e38a5c1\",\n  \"🌊 DigitalOcean\": \"316c2324c41380e787def75c4f43aa74\",\n  \"☁️ Inne chmury\": \"309c2324c4138082aa24c6bd4a8aa677\",\n  \"🌐 Tunelowanie instancji lokalnej\": \"30cc2324c413806baf78d1e3f11a8d28\",\n  \"🏗️ Orkiestracja\": \"2ffc2324c4138094bf56c9d3ff91e37d\",\n  \"📈 Autoskalowanie i kolejkowanie\": \"2ffc2324c41380bcad3fc7142c697310\",\n  \"🧱 Big data i platformy danych\": \"308c2324c41380a281d3cef17718a233\",\n  \"🤖 Modele i reasoning\": \"308c2324c4138005bd4fe39f57861fbb\",\n  \"🧪 Implementacje i modele\": \"30ac2324c41380f69270d8fa8f96643e\",\n  \"🤵 Systemy agentowe\": \"30ac2324c41380e8b3dae8af95aa284c\",\n  \"🎙️ Transkrypcja\": \"308c2324c413806faec0d858c87c32df\",\n  \"🗣️ Generowanie mowy\": \"308c2324c4138047b8f5f432b19be028\",\n  \"👤 Klonowanie głosu\": \"308c2324c41380f5bfffc3580e6ed842\",\n  \"🖼️ Obraz: generowanie\": \"308c2324c41380ecadfeeae7102d7239\",\n  \"👁️ Analiza obrazu\": \"308c2324c41380f389bbc64ee3ee14f2\",\n  \"📄 OCR i analiza dokumentów\": \"308c2324c413808c913bd6035d8fb284\",\n  \"🔍 AI Search i Web Research\": \"308c2324c41380eea559ea17ebff8ce9\",\n  \"🕷️ Infrastruktura headless\": \"308c2324c41380c998ebe21b4af3132f\",\n  \"🤖 Automatyzacja przeglądarki\": \"308c2324c41380aea086c6e6f2a52959\",\n  \"🔍 Ekstrakcja danych (web data)\": \"308c2324c41380e5948fcaab69363f4a\",\n  \"📉 Research i OSINT\": \"308c2324c41380c8a468e6523eefbb44\",\n  \"📱 Komunikatory i Chatboty\": \"30bc2324c41380e6b881f569732f89f9\",\n  \"👥 Profile i social media\": \"308c2324c41380e28b80d3175a98e00c\",\n  \"📢 Publikacja wielokanałowa\": \"308c2324c413808c9156c3399baa283c\",\n  \"🎙️ Podcasty i newslettery audio\": \"308c2324c413801b88b9c85a36d8a800\",\n  \"📧 Poczta e-mail\": \"308c2324c41380668aa8d02afc112324\",\n  \"🚨 Alerting i powiadomienia\": \"30cc2324c4138078b59ec5c9933a6940\",\n  \"🎯 Zarządzanie relacjami (CRM)\": \"30bc2324c41380499e9ad9f9a78eb6b4\",\n  \"🚀 Automatyzacja sprzedaży\": \"308c2324c41380179d1cf049dd14a53d\",\n  \"📩 Systemy follow-up\": \"308c2324c41380e795f7dcbb58add0b1\",\n  \"🛎️ Obsługa zgłoszeń i onboarding\": \"308c2324c41380f0a8e8e97d242a6d35\",\n  \"⭐ Automatyzacja zbierania opinii\": \"308c2324c41380ac8340dd5b9b47a0d7\",\n  \"👥 Rekrutacja i HR\": \"308c2324c413803dbc62c3eec540fbb1\",\n  \"🏢 Systemy ERP i Business Suite\": \"308c2324c413809aade9e4f3d58eae0b\",\n  \"📚 Dokumentacja IT\": \"30bc2324c413806f89befa2a524d169f\",\n  \"💾 Bazy danych i storage\": \"308c2324c413809bb10ff0d42e7df842\",\n  \"📄 Dokumenty i PDF\": \"30bc2324c413805d9e22d61652716244\",\n  \"💸 Monetyzacja i Billing AI\": \"308c2324c413803c91e4e5d7476ca177\",\n  \"📊 Analityka i Business Intelligence\": \"30dc2324c4138086a030c9a9d1c4de89\",\n  \"📡 Protokoły przemysłowe i IoT\": \"310c2324c41380c18c89cf4c676815b2\",\n  \"💻 Runtime i custom code (python)\": \"308c2324c41380deb5cbce63e8d029eb\",\n  \"🏗️ Tworzenie węzłów\": \"308c2324c41380e8b3c9ce033b7e7f7f\",\n  \"⚙️ Środowisko skryptowe i manipulacja danymi\": \"308c2324c41380ac8666dc004432902a\",\n  \"🧑‍💻 Jakość kodu\": \"30ac2324c41380f48affe369d9cd270f\",\n  \"🔧 Narzędzia DevOps i Tooling deweloperski\": \"30ac2324c41380f3832cfe9fac0fb524\",\n  \"🛠️ Zaawansowane narzędzia HTTP\": \"308c2324c41380b6ba6ff776d6c4cd3d\",\n  \"💻 SDK i Biblioteki Programistyczne\": \"30dc2324c41380e08d69fea43b488cfb\",\n  \"🔗 Integracje frameworków webowych\": \"310c2324c41380cf93e1ecd413d6634b\",\n  \"💡 Home Assistant\": \"316c2324c413802683a7e81edf3bec4e\",\n  \"📦 E-commerce i płatności\": \"30bc2324c4138037a33bf21c67a9570b\",\n  \"🎮 Rozrywka i gaming\": \"309c2324c413801ab0b3c1bcb355c132\",\n  \"💰 Finanse i kryptowaluty\": \"308c2324c4138098a13acff159719485\",\n  \"🔔 Produktywność osobista\": \"309c2324c4138028ae5bec79be9a8161\",\n  \"🎨 Media i multimedia\": \"309c2324c413801dbf65dfc16880d05d\",\n  \"🎬 Generowanie wideo AI\": \"30ec2324c413807ebcbfe936ecb96841\",\n  \"📮 Agregatory i RSS\": \"309c2324c4138062b231c96175969eff\",\n  \"📅 Kalendarze i planowanie\": \"309c2324c41380c2ba51d2dff1765aa7\",\n  \"✅ Zarządzanie projektami\": \"308c2324c4138019a667f616a5a401f3\",\n  \"🔍 SEO i marketing\": \"309c2324c41380e5ae9cc1b3e28ae09a\",\n  \"📂 Indeksy i listy węzłów społeczności\": \"30bc2324c4138061a5f4cdaf0a023946\",\n  \"🌉 Serwery i mosty sterujące\": \"2ffc2324c413803a88aedf947f80a9f8\",\n  \"🤖 Węzły klienckie\": \"2ffc2324c4138093893cd8a57f15a499\",\n  \"🌐 Warstwa łączności i bramek sieciowych\": \"2ffc2324c413803abe4dce71f885cf0d\",\n  \"🛠️ Skille i umiejętności agentów\": \"2ffc2324c41380ea930fd80469f3830f\",\n  \"🤖 ChatGPT (Web)\": \"30cc2324c413801298ddd8848314481c\",\n  \"🧑‍💻 Claude Code\": \"30cc2324c41380ccade6e979a332bb7f\",\n  \"🧠 Claude\": \"30cc2324c4138021a0ffcd5f492b3a09\",\n  \"🌐 Claude.ai (Web)\": \"30cc2324c4138036b55ae545a7dca0e1\",\n  \"💻 Cursor\": \"30cc2324c4138050aecef0df96fd6e90\",\n  \"💎 Gemini\": \"30cc2324c413801d946cc0781bf814b6\",\n  \"🤖 GitHub Copilot\": \"30cc2324c413800ea6aafbf01a9899ae\",\n  \"⚙️ Instalacja n8n-skills\": \"30cc2324c41380dd9664dad2ba0ae179\",\n  \"💜 Lovable\": \"30cc2324c41380e493b9d47f7f693d6e\",\n  \"💠 LM Studio\": \"30cc2324c4138005ab5bc7b3c25c492b\",\n  \"🔌 n8n-mcp.com\": \"30cc2324c4138048a35af94f4a726b13\",\n  \"🤖 OpenAI Agent Builder\": \"30cc2324c413808698bcf03de347e0a4\",\n  \"🚀 Windsurf\": \"30cc2324c413801e8fd6c79673ec62e2\",\n  \"📦 Gotowe stosy AI (All-in-one)\": \"308c2324c41380d3a448c594098d594a\",\n  \"🛠️ Infrastruktura AI\": \"308c2324c41380b39cfac1fd63acd956\",\n  \"🗃️ Lokalne bazy wektorowe\": \"308c2324c413805181baf779d5e591b0\",\n  \"📓 Inteligentne notatniki (Knowledge Notebooks)\": \"308c2324c41380d6bd7af6ee2231c5f4\",\n  \"🌲 Pinecone\": \"308c2324c413807893f5e35af0a5d911\",\n  \"🧭 Qdrant Cloud\": \"308c2324c41380f787d5d86469b73642\",\n  \"🐬 Supabase Cloud\": \"308c2324c4138080aca1d2c709aa5775\",\n  \"🔷 Gemini File Search\": \"308c2324c413808c9357f1ddff8562cb\",\n  \"🧵 Needle\": \"308c2324c41380f4a92dd3b2f4f51d26\",\n  \"🤖 OpenAI Assistants API\": \"308c2324c41380c3a261fc0cb14f7264\",\n  \"🧠 Strategie Retrieval (Multi-query, Reranking, Hybryda)\": \"308c2324c413804cbaa2d1c21c2f2562\",\n  \"🕸️ GraphRAG i Grafy Wiedzy (Neo4j, LightRAG, kingler/n8n_agent)\": \"308c2324c413803592fdca069607d483\",\n  \"🧪 Ewaluacja i Jakość (Monitoring RAG)\": \"308c2324c413806dbe9bff5fe7f80df4\",\n  \"🧭 Rozszerzenia interfejsu\": \"308c2324c41380019193ccd5f78922fc\",\n  \"📊 Dashboardy i wizualizacja\": \"308c2324c413804ea841e3b903ad5144\",\n  \"🖌️ Personalizacja UI\": \"309c2324c41380158acddbf9246e4cc5\",\n  \"🏥 Diagnostyka i monitoring zdrowia instancji\": \"308c2324c4138056b2fef3696414f522\",\n  \"📊 Zarządzanie przez n8n-panel\": \"308c2324c41380f38238d98614a4992e\",\n  \"🚨 Alertowanie o awariach\": \"308c2324c413808399eee11c9ade1a2e\",\n  \"💾 Zarządzanie wersjami i backup\": \"308c2324c41380419c18eee68ccbbf24\",\n  \"🐞 Debugowanie i techniki diagnostyczne\": \"308c2324c4138007ab63f52e95f08d2e\",\n  \"📈 Monitoring modeli i LLMOps\": \"308c2324c41380edbc93e5c35796402d\",\n  \"🔑 Zarządzanie konfiguracją i zmiennymi globalnymi\": \"308c2324c4138076ae8fce69b6505fa0\",\n  \"🔓 Zarządzanie poświadczeniami (credentials)\": \"309c2324c41380c5a18ec1d320431df8\",\n  \"🚨 Audyt, podatności\": \"2ffc2324c4138021a353d90758c4f769\",\n  \"👮 Automatyzacja SecOps\": \"2ffc2324c41380ccad52e74b538731b2\",\n  \"⚠️ Exploity i CVE\": \"309c2324c41380d18db3cf645a20cdb0\",\n  \"🧯 Automatyzacja bezpieczeństwa (SOAR)\": \"30cc2324c413804db974f2bdd2c7ba4b\",\n  \"🛡️ Cyberbezpieczeństwo i OffSec\": \"30dc2324c4138020b98ecfb47d437e3c\",\n  \"🚀 Gotowe rozwiązania biznesowe i Saas\": \"308c2324c41380ba8268f97a5707f123\",\n  \"🛡️ Inne\": \"2ffc2324c41380949833e5c9cda0fd5d\"\n}\nreturn $input.all().map(item => {\n  const data = item.json;\n  \n  // Oczyszczanie wejściowego liścia (usuwanie n8n-, białych znaków itp.)\n  const rawLeaf = (data.leaf || \"🛡️ Inne\")\n    .normalize(\"NFKC\")\n    .replace(/^n8n-/i, \"\") // Usuwa \"n8n-\" na początku (np. n8n-railway -> railway)\n    .trim();\n\n  // Szukanie klucza w REGISTRY (ignorując emoji i dopasowując po tekście)\n  const registryKey = Object.keys(REGISTRY).find(k => {\n    const cleanK = k.replace(/^[^\\p{L}]+/u, \"\").trim(); // Tekst bez emoji z REGISTRY\n    const cleanRaw = rawLeaf.replace(/^[^\\p{L}]+/u, \"\").trim(); // Tekst bez emoji z LLM\n    return cleanK.toLowerCase() === cleanRaw.toLowerCase();\n  });\n\n  const finalLeaf = registryKey || \"🛡️ Inne\";\n\n  return {\n    json: {\n      ...data, \n      leaf: finalLeaf,\n      notionBlockId: REGISTRY[finalLeaf] || REGISTRY[\"🛡️ Inne\"],\n      name: data.github?.name || data.repository?.name || data.name || \"Nieznane repo\",\n      html_url: data.github?.url || data.repository?.url || data.html_url || \"\",\n      icon: data.icon || \"🛡️\"\n    }\n  };\n});"
+      },
+      "id": "d8fe0c46-e047-4509-8287-b00ec8a7c476",
+      "name": "Resolve Notion Block",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "blockId": {
+          "__rl": true,
+          "value": "={{ $node[\"Add to Notion\"].json.results[0].id }}",
+          "mode": ""
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "bulleted_list_item",
+              "textContent": "=Zakres funkcjonalny: {{ $node[\"Resolve Notion Block\"].json.sections[0].content }}"
+            },
+            {
+              "type": "bulleted_list_item",
+              "textContent": "=Zastosowanie w automatyzacji: {{ $node[\"Resolve Notion Block\"].json.sections[1].content }}"
+            },
+            {
+              "type": "bulleted_list_item",
+              "textContent": "=Uwagi integracyjne: {{ $node[\"Resolve Notion Block\"].json.sections[2].content }}"
+            }
+          ]
+        }
+      },
+      "id": "db4c309b-e555-4bef-bad1-dfbc58dd99ee",
+      "name": "Add to Notion1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        1296
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "notionApi": {
+          "id": "BJDl3LjpAZj0mZnh",
+          "name": "Notion account PW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-2024-11-20",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-2024-11-20"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        2336
+      ],
+      "id": "00e63655-0a85-4d07-b0f9-d178d11e0da3",
+      "name": "OpenAI"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        2336
+      ],
+      "id": "06d37b8d-a243-462d-84d7-a62e0bba55ff",
+      "name": "Groq1"
+    },
+    {
+      "parameters": {
+        "model": "voxtral-small-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        2336
+      ],
+      "id": "72883d0c-92c6-41d0-8eab-8bfad3c62308",
+      "name": "Mistral1"
+    },
+    {
+      "parameters": {
+        "model": "rnj-1:8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        2336
+      ],
+      "id": "77b7c998-4a87-4278-944f-9c0bf1368ecd",
+      "name": "Ollama1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "9lsVlMOjYnoYrUKb",
+          "name": "Ollama Local account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        2336
+      ],
+      "id": "abb1abe0-ab97-4052-93e0-d92b5f9190f3",
+      "name": "Cohere1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemma-3-27b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        32,
+        2336
+      ],
+      "id": "2cdb06e2-ed99-44d2-9b3a-7f44c59049e3",
+      "name": "Gemini1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        2336
+      ],
+      "id": "aa39152b-43c7-445e-b6be-ce0c5e8c3374",
+      "name": "LM studio1"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1",
+        "options": {
+          "frequencyPenalty": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        2480
+      ],
+      "id": "1da3720d-5636-471e-9b0e-e43e85d8faf1",
+      "name": "OpenRouter2"
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "blockId": {
+          "__rl": true,
+          "value": "={{ $json.notionBlockId }}",
+          "mode": ""
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "toggle",
+              "richText": true,
+              "text": {
+                "text": [
+                  {
+                    "text": "={{ $json.icon }} ",
+                    "annotationUi": {
+                      "bold": false
+                    }
+                  },
+                  {
+                    "text": "={{ $json.name ?? \"Brak nazwy\" }}",
+                    "isLink": true,
+                    "textLink": "={{ $json.html_url ?? \"https://github.com\" }}",
+                    "annotationUi": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "text": "= | {{ $json.summary }}",
+                    "annotationUi": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "f325e9b8-eb69-46c3-a275-a43fd4ad21ec",
+      "name": "Add to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        880,
+        1296
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "notionApi": {
+          "id": "BJDl3LjpAZj0mZnh",
+          "name": "Notion account PW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getAll",
+        "blockId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.notionBlockId }}"
+        },
+        "simplifyOutput": false
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        1280
+      ],
+      "id": "15f0bc98-ea66-4e12-853b-e01288fe4a6f",
+      "name": "NOTION NODE — Traverse children",
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "BJDl3LjpAZj0mZnh",
+          "name": "Notion account PW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resolveData = $node[\"Resolve Notion Block\"].json;\nconst incomingUrl = resolveData.html_url;\n\nconst blocks = $input.all();\n\nfunction extractUrl(block) {\n  const rt = block.json?.toggle?.text || [];\n  for (const t of rt) {\n    if (t.text?.link?.url) return t.text.link.url;\n  }\n  return null;\n}\n\nlet exists = false;\n\nfor (const b of blocks) {\n  const url = extractUrl(b);\n  if (url === incomingUrl) {\n    exists = true;\n    break;\n  }\n}\n\nreturn [\n  {\n    json: {\n      ...resolveData,   // ← kluczowe\n      exists,\n      scanned: blocks.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        1280
+      ],
+      "id": "c41e50b8-329d-4426-a655-37261970dc19",
+      "name": "Code: Check Exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c0ff524b-2093-41b4-a379-99aed69b1697",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        1280
+      ],
+      "id": "8365d6c8-6a84-4d79-853e-a0face56b93b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nRęczne uruchomienie workflow do testów i developmentu.\n\n### Uwagi\n- Produkcyjnie zastąpić np. Cron / Webhook.",
+        "height": 272,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1520,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "a34e421a-ad1b-4d61-9729-0485240f4e5c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nWyszukuje repozytoria GitHub.\n\n### Output\nLista repo (`items[]`), każde zawiera m.in:\n- html_url\n- name\n- description\n\n### Uwagi\n- Zwraca maksymalnie 100 wyników na request (limit API).",
+        "height": 432,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1360,
+        816
+      ],
+      "typeVersion": 1,
+      "id": "d3dcdda2-02da-4beb-938d-5e9c9e0b8e0a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nSpłaszcza odpowiedź GitHub API do pojedynczych itemów.\n\n### Dlaczego\nGitHub zwraca strukturę zagnieżdżoną (`items[]`), a n8n pracuje wygodniej na flat items.\n\n### Output\n1 item = 1 repozytorium.",
+        "height": 400,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1200,
+        848
+      ],
+      "typeVersion": 1,
+      "id": "59cfbb4b-0217-4894-8f5b-26ad9540f9cf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nIteruje repozytoria partiami (batch).\n\n### Konfiguracja\nBatch size: np. 100\n\n\n### Ważne\nJeśli downstream node nie zwróci danych → pętla się kończy.\nDlatego później potrzebne było `Always Output Data`.",
+        "height": 384,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1040,
+        864
+      ],
+      "typeVersion": 1,
+      "id": "00750f31-f95b-47b8-8800-c89b8113681e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nPobiera README.md dla aktualnego repo.\n\n### Input\nRepo z poprzedniego batcha.\n\n### Output\nSurowy README.\n\n### Pułapka\nNie każde repo ma README → trzeba uważać na null.",
+        "height": 416,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -784,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "97280f0b-12ac-4d5c-b5f4-1f65788b2509",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nCzyści / skraca README przed wysłaniem do LLM.\n\n### Cel\n- zmniejszyć tokeny\n- usunąć markdown noise\n- przygotować do klasyfikacji\n\n### Output\nTekst gotowy dla LLM.",
+        "height": 400,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -624,
+        848
+      ],
+      "typeVersion": 1,
+      "id": "e361a803-e458-43f9-8624-b658207d6522",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nZ README generuje strukturalny JSON:\n- summary\n- sections[]\n- leaf\n- icon\n\n### Uwagi\nTo jest Twój semantic parser.\nOd jakości promptu zależy jakość całej bazy wiedzy.",
+        "height": 384,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -416,
+        880
+      ],
+      "typeVersion": 1,
+      "id": "9473f943-3be5-4322-bb00-8c4c04dc2625",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "### Rola\nDodaje nowy toggle z linkiem repo.\n\n### Input wymagany\n- notionBlockId\n- icon\n- html_url\n- summary\n\n### Najczęstszy błąd\nInvalid request URL\n\nPowód:\nnotionBlockId = undefined  \nbo upstream nie propagował danych.",
+        "height": 352,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        928
+      ],
+      "typeVersion": 1,
+      "id": "2c0ce591-9873-4034-86c8-e71e857c25d1",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "### Warunek\nexists === false\n\n### True\n→ Add to Notion\n\n### False\n→ skip (repo już istnieje)",
+        "height": 144,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        1120
+      ],
+      "typeVersion": 1,
+      "id": "25b9e377-0f0e-4355-b209-c2c46408acda",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Resolve Notion Block\n### Rola\nMapuje wynik LLM na:\n- notionBlockId\n- html_url\n- leaf\n- sections\n\n### To jest kluczowy node\n\nTu powstaje:\n- notionBlockId → parent toggle\n- html_url → canonical repo URL\n\n### Dlaczego\nLLM operuje na semantyce (kategorie, opisy), a Notion wymaga identyfikatorów bloków.\n\nTen node jest mostem między:\n- warstwą semantyczną (LLM)\n- warstwą strukturalną (Notion blocks)\n\nBez niego downstream nie wie:\n- gdzie zapisywać dane,\n- pod jakim parentem,\n- ani jaką hierarchię zachować.\n\n### Strategia\n1. Na podstawie `leaf` wybiera docelowy blok Notion.\n2. Dołącza do payloadu:\n   - `notionBlockId`\n   - `html_url`\n   - `icon`\n   - `summary`\n   - `sections`\n\n### Edge Case\nJeśli `leaf` nie pasuje do żadnej znanej kategorii,\nfallback trafia do `🛡️ Inne`.\n\nTen node zakłada, że upstream (Validate JSON) zagwarantował kompletność danych.",
+        "height": 1264,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "ae20b5a8-6109-4b10-9adc-2ced178d5bef",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Code: Check Exists\n### Rola\nPorównuje incoming html_url z linkami w istniejących toggle.\n\n\n### Strategia\n1. Pobiera dane źródłowe z `Resolve Notion Block`.\n2. Odczytuje `html_url` jako `incomingUrl`.\n3. Iteruje po wszystkich dzieciach (`$input.all()`).\n4. Z każdego toggle wyciąga:\n   - `toggle.text[].text.link.url`\n5. Jeśli znajdzie identyczny URL → ustawia `exists = true`.\n\n### Implementacja\n- bierze resolveData z Resolve Notion Block\n- iteruje children z Traverse\n- wyciąga link z toggle.rich_text\n- ustawia:\n\nexists: boolean  \nscanned: number\n\n\n### Efekt\nNode działa jako:\n- kontrakt: „zapis do Notion tylko jeśli `exists === false`”.\n\n\n",
+        "height": 816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        448
+      ],
+      "typeVersion": 1,
+      "id": "f62b0148-a2b2-4d93-961e-06b2b2e944c2",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## NOTION NODE — Traverse children\n### Rola\nPobiera istniejące children bloku (toggle repozytoriów) i zwraca je jako listę do dalszej analizy (deduplikacja).\n\n### Po co\nŻeby wykryć duplikaty.\n\n### Strategia\n1. Używa `Get Child Blocks` dla `notionBlockId`.\n2. Zwraca wszystkie dzieci jako osobne itemy.\n3. Kolejny node (`Code: Check Exists`) iteruje po nich i porównuje URL.\n\n### Edge Case\nJeśli blok nie ma dzieci:\n- node może zwrócić pusty output,\n- dlatego włączone jest **Always Output Data**,\n- a logika deduplikacji musi obsłużyć sytuację `blocks.length === 0`.",
+        "height": 1056,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "1e6a773e-3ee3-464c-a299-773989a65074",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Validate JSON\n### Rola\nCzyści odpowiedź LLM, parsuje JSON i waliduje minimalną strukturę danych (`leaf`, `icon`, `summary`, `sections`).\n\n### Dlaczego\nLLM potrafi:\n\n- zwrócić markdown zamiast czystego JSON\n- pominąć wymagane pola\n- wygenerować nieparsowalny output\n\n### Strategia\n1. Usuwa ```json``` i ``` z odpowiedzi modelu.\n2. Próbuje `JSON.parse`.\n3. Sprawdza obecność:\n   - `leaf`\n   - `icon`\n   - `summary`\n   - dokładnie 3 `sections`\n\n### Fallback\nJeśli którakolwiek walidacja się nie powiedzie:\n\n- zwracany jest bezpieczny placeholder:\n  - `leaf: 🛡️ Inne`\n  - `summary: <powód błędu>`\n  - 3 sekcje z wartościami `\"Brak\"`\n\nDzięki temu downstream (Notion, deduplikacja, UI) **nigdy nie dostaje undefined**.\n\n### Efekt\nFail-soft zamiast fail-hard:\n\nPipeline nie wybucha, nawet gdy LLM halucynuje.",
+        "height": 1040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "f482a54d-507a-4b5f-b01c-0d19b080fb2c",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {},
+      "id": "b04af423-3975-47ec-8aaf-c57348c40f79",
+      "name": "Start testu",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -896,
+        1280
+      ],
+      "id": "58269736-d33c-458b-9e17-df90fcf86a5e",
+      "name": "Wait",
+      "webhookId": "68f17390-456a-47f8-922f-630c6108a97d"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {
+          "maxTokens": 2048,
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "id": "e60f7155-075e-4442-862b-03de1080bebf",
+      "name": "OpenRouter1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        2608
+      ]
+    },
+    {
+      "parameters": {
+        "model": "hf.co/bartowski/Qwen_Qwen3-32B-GGUF:Q6_K_L",
+        "options": {
+          "temperature": 0,
+          "numCtx": 12000,
+          "numPredict": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        1536
+      ],
+      "id": "bbae90b0-9197-494a-a4f3-d122e78fcff9",
+      "name": "Qwen3-32B-Q6",
+      "credentials": {
+        "ollamaApi": {
+          "id": "9lsVlMOjYnoYrUKb",
+          "name": "Ollama Local account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Search GitHub": {
+      "main": [
+        [
+          {
+            "node": "Extract Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Items": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get README": {
+      "main": [
+        [
+          {
+            "node": "Normalize README",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize README": {
+      "main": [
+        [
+          {
+            "node": "LLM Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Classifier": {
+      "main": [
+        [
+          {
+            "node": "Validate JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate JSON": {
+      "main": [
+        [
+          {
+            "node": "Resolve Notion Block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Notion Block": {
+      "main": [
+        [
+          {
+            "node": "NOTION NODE — Traverse children",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Notion1": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Notion": {
+      "main": [
+        [
+          {
+            "node": "Add to Notion1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NOTION NODE — Traverse children": {
+      "main": [
+        [
+          {
+            "node": "Code: Check Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Check Exists": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add to Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start testu": {
+      "main": [
+        [
+          {
+            "node": "Search GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get README",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter1": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Qwen3-32B-Q6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f1e92aac-f24e-4fd4-96c3-7a93d5cbcee8",
+  "meta": {
+    "instanceId": "74f56598b9b23c64363f9fca45908030cc4409fb679001a30cfd26310391236d"
+  },
+  "id": "uvGMv8r9wYIeM6x6",
+  "tags": []
+}
