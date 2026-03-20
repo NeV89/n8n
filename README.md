@@ -10,25 +10,25 @@ Self-hosted automation stack integrated with a local LLM inference server, deplo
 
 This repository hosts production-ready n8n workflows integrated with local LLMs.
 
-  * **[GitHub Repository Classifier](https://www.google.com/search?q=./blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
+  * **[GitHub Repository Classifier](https://www.google.com/search?q=blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
       * *Features:* Semantic analysis (Gemini/GPT), JSON auto-repair, and Notion block mapping.
-      * *Source:* [github-repo-classifier.json](https://www.google.com/search?q=./blueprints/github-repo-classifier.json)
+      * *Source:* [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
 
 -----
 
 ## 🛠 Stack
 
-| Service | Role | |
-|---|---|---|
-| **n8n** | Workflow automation engine (self-hosted) | |
-| **Ollama** | Local LLM inference server | |
-| **Supabase** | PostgreSQL database + pgvector for RAG | |
-| **Qdrant** | Vector store for semantic search | |
-| **Open WebUI** | Chat interface for local models | |
-| **Langfuse** | LLM observability and tracing | |
-| **Neo4j** | Knowledge graph (GraphRAG) | |
-| **SearXNG** | Private web search | |
-| **Portainer** | Docker container management | |
+| Service | Role | | |
+|---|---|---|---|
+| **n8n** | Workflow automation engine (self-hosted) | | |
+| **Ollama** | Local LLM inference server | | |
+| **Supabase** | PostgreSQL database + pgvector for RAG | | |
+| **Qdrant** | Vector store for semantic search | | |
+| **Open WebUI** | Chat interface for local models | | |
+| **Langfuse** | LLM observability and tracing | | |
+| **Neo4j** | Knowledge graph (GraphRAG) | | |
+| **SearXNG** | Private web search | | |
+| **Portainer** | Docker container management | | |
 
 All services run as Docker containers via [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged).
 
@@ -50,12 +50,12 @@ Optimized for high-density local inference and large-scale data processing.
 
 Models selected for dense architecture optimized for the 32 GB VRAM envelope:
 
-| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed | |
-|---|---|---|---|---|---|
-| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ | |
-| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ | |
-| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ | |
-| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ | |
+| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed | | |
+|---|---|---|---|---|---|---|
+| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ | | |
+| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ | | |
+| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ | | |
+| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ | | |
 
 -----
 
@@ -103,4 +103,4 @@ N8N_SECURE_COOKIE=false
 
   * [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged)
   * [czlonkowski/n8n-mcp](https://github.com/czlonkowski/n8n-mcp)
-  * [Nev89 Intelligence Hub](https://www.google.com/search?q=../docs/intelligence-hub.md)
+  * [Nev89 Intelligence Hub](https://www.google.com/search?q=https://github.com/NeV89/Nev89/blob/main/docs/intelligence-hub.md)
