@@ -11,24 +11,23 @@ Self-hosted automation stack integrated with a local LLM inference server, deplo
 This repository hosts production-ready n8n workflows integrated with local LLMs.
 
   * **[GitHub Repository Classifier](https://www.google.com/search?q=blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
-      * *Features:* Semantic analysis (Gemini/GPT), JSON auto-repair, and Notion block mapping.
-      * *Source:* [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
+  * **Source:** [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
 
 -----
 
 ## 🛠 Stack
 
-| Service | Role | |
-|---|---|
-| **n8n** | Workflow automation engine (self-hosted) | |
-| **Ollama** | Local LLM inference server | |
-| **Supabase** | PostgreSQL database + pgvector for RAG | |
-| **Qdrant** | Vector store for semantic search | |
-| **Open WebUI** | Chat interface for local models | |
-| **Langfuse** | LLM observability and tracing | |
-| **Neo4j** | Knowledge graph (GraphRAG) | |
-| **SearXNG** | Private web search | |
-| **Portainer** | Docker container management | |
+| Service | Role |
+| :--- | :--- |
+| **n8n** | Workflow automation engine (self-hosted) |
+| **Ollama** | Local LLM inference server |
+| **Supabase** | PostgreSQL database + pgvector for RAG |
+| **Qdrant** | Vector store for semantic search |
+| **Open WebUI** | Chat interface for local models |
+| **Langfuse** | LLM observability and tracing |
+| **Neo4j** | Knowledge graph (GraphRAG) |
+| **SearXNG** | Private web search |
+| **Portainer** | Docker container management |
 
 All services run as Docker containers via [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged).
 
@@ -38,11 +37,11 @@ All services run as Docker containers via [coleam00/local-ai-packaged](https://g
 
 Optimized for high-density local inference and large-scale data processing.
 
-  - **GPU:** NVIDIA GeForce **RTX 5090 (32 GB VRAM)**
-  - **CPU:** AMD Ryzen 7 9700X (Zen 5, AVX-512)
-  - **RAM:** 64 GB DDR5 6000 MHz
-  - **SSD:** Samsung 990 EVO Plus 1TB (NVMe, PCIe 4.0)
-  - **OS:** Ubuntu 24.04 LTS
+  * **GPU:** NVIDIA GeForce **RTX 5090 (32 GB VRAM)**
+  * **CPU:** AMD Ryzen 7 9700X (Zen 5, AVX-512)
+  * **RAM:** 64 GB DDR5 6000 MHz
+  * **SSD:** Samsung 990 EVO Plus 1TB (NVMe, PCIe 4.0)
+  * **OS:** Ubuntu 24.04 LTS
 
 -----
 
@@ -50,12 +49,12 @@ Optimized for high-density local inference and large-scale data processing.
 
 Models selected for dense architecture optimized for the 32 GB VRAM envelope:
 
-| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed | |
-|---|---|---|---|---|
-| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ | |
-| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ | |
-| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ | |
-| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ | |
+| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed |
+| :--- | :--- | :---: | :---: | :---: |
+| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ |
+| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ |
+| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ |
+| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ |
 
 -----
 
@@ -86,6 +85,7 @@ sed -i 's/\r$//' supabase/docker/volumes/pooler/pooler.exs
 ### n8n LAN Access (HTTP)
 
 ```bash
+# Set secure cookie to false for local network access
 N8N_SECURE_COOKIE=false
 ```
 
