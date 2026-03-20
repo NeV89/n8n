@@ -11,11 +11,11 @@ Self-hosted automation stack integrated with a local LLM inference server, deplo
 This repository hosts production-ready n8n workflows integrated with local LLMs.
 
   * **[GitHub Repository Classifier](https://www.google.com/search?q=blueprints/README.md):** An autonomous engine that classifies technical repositories into a structured Notion database.
-  * **Source:** [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
+      * **Source:** [github-repo-classifier.json](https://www.google.com/search?q=blueprints/github-repo-classifier.json)
 
 -----
 
-## 🛠 Stack
+## 🛠️ Stack
 
 | Service | Role |
 | :--- | :--- |
@@ -33,7 +33,7 @@ All services run as Docker containers via [coleam00/local-ai-packaged](https://g
 
 -----
 
-## 🖥 Hardware Configuration
+## 🖥️ Hardware Configuration
 
 Optimized for high-density local inference and large-scale data processing.
 
@@ -81,21 +81,6 @@ claude --model qwen3-coder:30b
 ```bash
 sed -i 's/\r$//' supabase/docker/volumes/pooler/pooler.exs
 ```
-
-### n8n LAN Access (HTTP)
-
-```bash
-# Set secure cookie to false for local network access
-N8N_SECURE_COOKIE=false
-```
-
------
-
-## 💾 Backup Strategy
-
-1.  **Folder Archive:** Compressed `tar.gz` of the full project directory.
-2.  **System Snapshots:** Timeshift for OS and NVIDIA driver stability.
-3.  **Bare Metal:** Rescuezilla for full 1:1 disk cloning.
 
 -----
 
