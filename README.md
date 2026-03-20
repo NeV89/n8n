@@ -18,17 +18,17 @@ This repository hosts production-ready n8n workflows integrated with local LLMs.
 
 ## 🛠 Stack
 
-| Service | Role | | |
-|---|---|---|---|
-| **n8n** | Workflow automation engine (self-hosted) | | |
-| **Ollama** | Local LLM inference server | | |
-| **Supabase** | PostgreSQL database + pgvector for RAG | | |
-| **Qdrant** | Vector store for semantic search | | |
-| **Open WebUI** | Chat interface for local models | | |
-| **Langfuse** | LLM observability and tracing | | |
-| **Neo4j** | Knowledge graph (GraphRAG) | | |
-| **SearXNG** | Private web search | | |
-| **Portainer** | Docker container management | | |
+| Service | Role | |
+|---|---|
+| **n8n** | Workflow automation engine (self-hosted) | |
+| **Ollama** | Local LLM inference server | |
+| **Supabase** | PostgreSQL database + pgvector for RAG | |
+| **Qdrant** | Vector store for semantic search | |
+| **Open WebUI** | Chat interface for local models | |
+| **Langfuse** | LLM observability and tracing | |
+| **Neo4j** | Knowledge graph (GraphRAG) | |
+| **SearXNG** | Private web search | |
+| **Portainer** | Docker container management | |
 
 All services run as Docker containers via [coleam00/local-ai-packaged](https://github.com/coleam00/local-ai-packaged).
 
@@ -50,12 +50,12 @@ Optimized for high-density local inference and large-scale data processing.
 
 Models selected for dense architecture optimized for the 32 GB VRAM envelope:
 
-| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed | | |
-|---|---|---|---|---|---|---|
-| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ | | |
-| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ | | |
-| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ | | |
-| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ | | |
+| Model | Quantization | Logic/Reasoning | Tools/Automation | Speed | |
+|---|---|---|---|---|
+| **Qwen3-32B** | Q6\_K\_L | ★★★★★ | ★★★★★ | ★★★☆☆ | |
+| **DeepSeek-R1-Distill-32B** | Q6\_K | ★★★★★ | ★★★☆☆ | ★★☆☆☆ | |
+| **Mistral-Small-3.2-24B** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★★ | |
+| **Gemma-3-27B-IT** | Q8\_0 | ★★★★☆ | ★★★★★ | ★★★★☆ | |
 
 -----
 
