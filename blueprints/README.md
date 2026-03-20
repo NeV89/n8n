@@ -1,8 +1,3 @@
-Zastosowałem Twoją **Formułę Promptu Idealnego**, aby wyczyścić ten plik do zera. Usunąłem wszystkie śmieciowe linki, naprawiłem formatowanie list i domknąłem blok diagramu Mermaid.
-
-Oto kompletny i "sterylny" kod dla pliku **`blueprints/README.md`** (czyli tego wewnątrz folderu):
-
-````markdown
 # 🧠 n8n AI Intelligence Hub & Repository Classifier
 
 An advanced, autonomous pipeline designed to discover, analyze, and organize the AI automation ecosystem. This system transforms unstructured GitHub repository data into a highly structured, deduplicated knowledge tree inside Notion using Large Language Models (LLMs).
@@ -26,71 +21,56 @@ graph TD
     E --> F[Category-to-Notion Block Mapping]
     F --> G[Deduplication Engine]
     G --> H[Notion Structured Storage]
-````
+```
 
------
+---
 
 ## ⚙️ Key Features
 
-  * **Leaf Node Precision:** The LLM is constrained to identify the most specific "leaf" category (e.g., `MCP Servers` instead of just `AI`), ensuring deep hierarchy placement.
-  * **Deterministic Mapping:** A custom JavaScript engine bridges the gap between AI semantics and Notion's infrastructure by mapping categories to unique Block IDs.
-  * **Intelligent Deduplication:** Before writing, the system performs a real-time traversal of existing Notion blocks to compare GitHub URLs, ensuring an idempotent database.
-  * **LLM Safety Layer:** Includes a fail-soft JSON repair logic to handle non-standard outputs from models like GPT-4o-mini or Gemini 2.0 Flash.
-  * **5-Tier Logic for AI Sales:** Specifically optimized to categorize GTM tools into: *Discovery ➔ Enrichment ➔ Intelligence ➔ Generation ➔ Lifecycle.*
+* **Leaf Node Precision:** The LLM is constrained to identify the most specific "leaf" category (e.g., `MCP Servers` instead of just `AI`), ensuring deep hierarchy placement.
+* **Deterministic Mapping:** A custom JavaScript engine bridges the gap between AI semantics and Notion's infrastructure by mapping categories to unique Block IDs.
+* **Intelligent Deduplication:** Before writing, the system performs a real-time traversal of existing Notion blocks to compare GitHub URLs, ensuring an idempotent database.
+* **LLM Safety Layer:** Includes a fail-soft JSON repair logic to handle non-standard outputs from models like GPT-4o-mini or Gemini 2.0 Flash.
+* **5-Tier Logic for AI Sales:** Specifically optimized to categorize GTM tools into: *Discovery ➔ Enrichment ➔ Intelligence ➔ Generation ➔ Lifecycle.*
 
------
+---
 
 ## 🛠️ Tech Stack
 
-  * **Orchestration:** [n8n](https://www.google.com/search?q=https://n8n.io/) (Self-hosted)
-  * **Models:** Gemini 2.0 Flash, GPT-4o-mini (via [OpenRouter](https://www.google.com/search?q=https://openrouter.ai/))
-  * **Storage:** [Notion API](https://www.google.com/search?q=https://developers.notion.com/) (Hierarchical Database)
-  * **Logic:** Node.js / JavaScript (Custom n8n Nodes)
-  * **Data Source:** [GitHub API](https://www.google.com/search?q=https://docs.github.com/en/rest)
+* **Orchestration:** [n8n](https://n8n.io/) (Self-hosted)
+* **Models:** Gemini 2.0 Flash, GPT-4o-mini (via [OpenRouter](https://openrouter.ai/))
+* **Storage:** [Notion API](https://developers.notion.com/) (Hierarchical Database)
+* **Logic:** Node.js / JavaScript (Custom n8n Nodes)
+* **Data Source:** [GitHub API](https://docs.github.com/en/rest)
 
------
+---
 
 ## 📋 Categorization Schema
 
 The system maps repositories into specialized domains including:
 
-  * **Infrastructure:** Docker, Cloud Native, Proxmox/LXC, Kubernetes.
-  * **AI & Agents:** RAG Systems, MCP Protocol, Autonomous Browser Operators.
-  * **Workflow Collections:** Production blueprints and template search engines.
-  * **Security:** SecOps automation, audits, and vulnerability scanners.
-
------
-
-## 🚦 Getting Started
-
-1.  **Import:** Download the [workflow JSON](https://www.google.com/search?q=./github-repo-classifier.json) and import it into your n8n instance.
-2.  **Configure:** Set up credentials for GitHub, Notion, and your LLM provider.
-3.  **Map:** Replace the placeholder Notion Block IDs in the `Resolve Notion Block` node with your own structure.
-4.  **Run:** Execute the search trigger to start the autonomous classification.
-
------
-
-## 📈 Impact & Results
-
-  * **1,000+ Repositories** processed and verified.
-  * **40,000+ Automation Templates** mapped and indexed.
-  * **100% Private Inference:** Optimized for local hardware (NVIDIA RTX 5090).
-
------
-
-*Built by [Paweł Wójcikiewicz (Nev89)](https://github.com/Nev89)* *Back to [Main README](https://www.google.com/search?q=../README.md)*
-
-````
+* **Infrastructure:** Docker, Cloud Native, Proxmox/LXC, Kubernetes.
+* **AI & Agents:** RAG Systems, MCP Protocol, Autonomous Browser Operators.
+* **Workflow Collections:** Production blueprints and template search engines.
+* **Security:** SecOps automation, audits, and vulnerability scanners.
 
 ---
 
-### Co zostało naprawione?
-1. **Diagram Mermaid:** Dodałem brakujące zamknięcie bloku (```), dzięki czemu diagram teraz się wyrenderuje.
-2. **Key Features:** Zamieniłem tekst na listę punktową z **pogrubionymi nagłówkami** – znacznie lepiej się to czyta.
-3. **Tech Stack:** Wszystkie linki są bezpośrednie (n8n, OpenRouter, Notion). Zero Google'a.
-4. **Linki relatywne:** * `[workflow JSON](./github-repo-classifier.json)` – ponieważ plik jest w tym samym folderze.
-   * `[Main README](../README.md)` – aby wrócić do folderu głównego.
-5. **Stopka:** Czysty link do Twojego profilu bez śledzenia Google.
+## 🚦 Getting Started
 
-**Kopiuj, wklejaj i zatwierdzaj (Commit)!** Jeśli wszystko działa, Twój techniczny "Blueprint" jest gotowy. Czy chcesz teraz dodać tę licencję Apache-2.0 do swojego profilu głównego (`NeV89/NeV89`), żeby domknąć formalności?
-````
+1. **Import:** Download the [workflow JSON](./github-repo-classifier.json) and import it into your n8n instance.
+2. **Configure:** Set up credentials for GitHub, Notion, and your LLM provider.
+3. **Map:** Replace the placeholder Notion Block IDs in the `Resolve Notion Block` node with your own structure.
+4. **Run:** Execute the search trigger to start the autonomous classification.
+
+---
+
+## 📈 Impact & Results
+
+* **1,000+ Repositories** processed and verified.
+* **40,000+ Automation Templates** mapped and indexed.
+* **100% Private Inference:** Optimized for local hardware (NVIDIA RTX 5090).
+
+---
+*Built by [Paweł Wójcikiewicz (Nev89)](https://github.com/Nev89)*
+*Back to [Main README](../README.md)*
