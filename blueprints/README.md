@@ -1,14 +1,3 @@
-### 1\. Nazwa i opis (Sekcja "About")
-
-  * **Proponowana nazwa repozytorium:** `n8n-ai-intelligence-hub` lub `github-knowledge-architect`
-  * **Opis (About):** `Autonomous n8n pipeline that transforms raw GitHub data into a curated technical knowledge base in Notion using LLM-based semantic classification and multi-level taxonomy mapping.`
-
------
-
-### 2\. Finalny plik README.md (Wersja Angielska)
-
-Wklej poniższą treść do pliku `README.md` w głównym katalogu tego projektu (lub do `docs/intelligence-hub.md`, jeśli trzymasz to wewnątrz repozytorium `n8n`).
-
 ````markdown
 # 🧠 n8n AI Intelligence Hub & Repository Classifier
 
